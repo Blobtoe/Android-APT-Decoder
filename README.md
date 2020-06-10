@@ -9,6 +9,14 @@ Currently, the app will only run for 5 minutes because it is running on an unlis
 ## Installing
 You can find the apk file in /apk/. I plan on releasing it to the play store soon.
 
+# To do:
+  - Add parameters for sharpening and stuff
+  - Fix resmapling on certain files
+  - Implement zoom on images
+  - Allow user to pick specific folder to save images
+  - Add error messages
+  - Add decoding log
+
 ## Screenshots
 ![](https://github.com/Blobtoe/Android-APT-Decoder/blob/master/Screenshot_1.jpg)
 ![](https://github.com/Blobtoe/Android-APT-Decoder/blob/master/Screenshot_2.jpg)
