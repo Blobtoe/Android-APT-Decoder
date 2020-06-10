@@ -6,5 +6,5 @@ Currently, the app will only run for 5 minutes because it is running on an unlis
 # Installing
 You can find the apk file in /apk/. I plan on releasing it to the play store soon.
 
+![](https://github.com/Blobtoe/Android-APT-Decoder/blob/master/Screenshot_1.jpg)
 ![](https://github.com/Blobtoe/Android-APT-Decoder/blob/master/Screenshot_2.jpg)
-1[](https://github.com/Blobtoe/Android-APT-Decoder/blob/master/Screenshot_1.jpg)
