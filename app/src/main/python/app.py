@@ -18,13 +18,18 @@ class APT_signal(object):
 
     def __init__ (self, wavIN):
         print("Loading audio file...")
-        data, rate = librosa.core.load(wavIN, sr=self.SAMPLE_RATE, mono=True, duration=450)
-        if len(data)/rate == 450:
-            data2, rate2 = librosa.core.load(wavIN, sr=self.SAMPLE_RATE, mono=True, offset=450)
-            data = numpy.concatenate((data, data2))
-        librosa.output.write_wav(wavIN[:-4] + "_converted.wav", data, rate)
-        (rate, self.signal) = scipy.io.wavfile.read(wavIN[:-4] + "_converted.wav")
-        print("Done resample and remixing.\n")
+        try:
+            data, rate = librosa.core.load(wavIN, sr=self.SAMPLE_RATE, mono=True, duration=450)
+            if len(data)/rate == 450:
+                data2, rate2 = librosa.core.load(wavIN, sr=self.SAMPLE_RATE, mono=True, offset=450)
+                data = numpy.concatenate((data, data2))
+            librosa.output.write_wav(wavIN[:-4] + "_converted.wav", data, rate)
+            (rate, self.signal) = scipy.io.wavfile.read(wavIN[:-4] + "_converted.wav")
+            print("Done resample and remixing.\n")
+        except:
+            print("ERROR! Failed to open input file.")
+            sys.exit("Stopping")
+        
 
     def decode(self, outfile=None, shrp=1.0, cmbn=None, contr=1.0, filter=None):
         #Bandpass filter
@@ -51,19 +56,23 @@ class APT_signal(object):
 
         # Take the Hilbert transform
         print("Taking Hilbert transform...")
-        splitNum = 10
-        splitLen = len(self.signal) - (len(self.signal)%splitNum)
-        if splitLen < len(self.signal):
-            self.signal = self.signal[:int(-(len(self.signal)-splitLen))].copy()
-        split = numpy.split(self.signal, splitNum)
-        signalHilbert = numpy.array([])
-        i = 1
-        for array in split:
-            temp = scipy.signal.hilbert(array)
-            signalHilbert = numpy.concatenate((signalHilbert, temp))
-            print("transformed {}/{}".format(i, splitNum))
-            i += 1
-        print("Done.\n")
+        try:
+            splitNum = 10
+            splitLen = len(self.signal) - (len(self.signal)%splitNum)
+            if splitLen < len(self.signal):
+                self.signal = self.signal[:int(-(len(self.signal)-splitLen))].copy()
+            split = numpy.split(self.signal, splitNum)
+            signalHilbert = numpy.array([])
+            i = 1
+            for array in split:
+                temp = scipy.signal.hilbert(array)
+                signalHilbert = numpy.concatenate((signalHilbert, temp))
+                print("transformed {}/{}".format(i, splitNum))
+                i += 1
+            print("Done.\n")
+        except:
+            print("ERROR! Probably ran out of ram. Close all other open apps and try again")
+            sys.exit("Stopping")
 
         # Median filter
         print("Taking median filter...")
@@ -194,10 +203,6 @@ class APT_signal(object):
 
 def main(infile, outfile):
     infile = join(dirname(__file__), infile)
-    print(infile)
-    #outfile = join(dirname(__file__), "test.png")
-    #infile = "/storage/emulated/0/audio.wav"
-    #outfile = "/storage/emulated/0/test.png"
     apt = APT_signal(infile)
     apt.decode(outfile, 1.0, 1.0, 1.0, 1)
     os.remove(infile)
