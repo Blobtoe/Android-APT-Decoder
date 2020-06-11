@@ -11,6 +11,9 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.FileObserver;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -24,9 +27,12 @@ import com.codekidlabs.storagechooser.StorageChooser;
 import com.nbsp.materialfilepicker.MaterialFilePicker;
 import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
 
     String infile = "";
     String outfile = "";
+
+    String status = "IDLE";
 
     private static final int INFILE_REQUEST_CODE = 1000;
     private static final int OUTFILE_REQUEST_CODE = 1001;
@@ -154,7 +162,41 @@ public class MainActivity extends AppCompatActivity {
                             public void run() {
                                 Python py = Python.getInstance();
                                 try {
+                                    (new Thread(new Runnable()
+                                    {
+
+                                        @Override
+                                        public void run()
+                                        {
+                                            while (!Thread.interrupted() && status == "DECODING")
+                                                try
+                                                {
+                                                    Thread.sleep(500);
+                                                    runOnUiThread(new Runnable() // start actions in UI thread
+                                                    {
+
+                                                        @Override
+                                                        public void run()
+                                                        {
+                                                            try {
+                                                                String fileContent = getFileContent();
+                                                                if (fileContent.length() > 0) {
+                                                                    decodeTextView.setText(fileContent);
+                                                                } // this action have to be in UI thread
+                                                            } catch (Exception e){
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                                catch (InterruptedException e)
+                                                {
+                                                    // ooops
+                                                }
+                                        }
+                                    })).start(); // the while thread will start in BG thread
                                     outfile = "/storage/emulated/0/" + fileName.substring(0, fileName.length() - 3) + "png";
+                                    status = "DECODING";
                                     py.getModule("app").callAttr("main", fileName, outfile);
                                     PostDecode(outfile);
                                 } catch (Exception e) {
@@ -172,6 +214,26 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private String getFileContent() {
+        File file = new File(getFilesDir().toString() + "/chaquopy/AssetFinder/app/" + "test.txt");
+        if (!file.exists()){
+            String line = "Need to add smth";
+            return line;
+        }
+        String line = null;
+        //Read text from file
+        //StringBuilder text = new StringBuilder();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            line = br.readLine();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            //You'll need to add proper error handling here
+        }
+        return line;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -187,6 +249,7 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                status = "IDLE";
                 decodeTextView.setText("DONE");
                 progressBar.setVisibility(View.INVISIBLE);
 

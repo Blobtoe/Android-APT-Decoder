@@ -1,6 +1,7 @@
 import numpy
 import scipy.io.wavfile
 import scipy.signal
+from scipy import fftpack
 import sys
 from PIL import Image
 from PIL import ImageEnhance
@@ -17,6 +18,9 @@ class APT_signal(object):
     SAMPLE_RATE = 20800
 
     def __init__ (self, wavIN):
+        f = open(join(dirname(__file__), "test.txt"), "w")
+        f.write("Loading audio file...")
+        f.close()
         print("Loading audio file...")
         try:
             data, rate = librosa.core.load(wavIN, sr=self.SAMPLE_RATE, mono=True, duration=450)
@@ -25,11 +29,16 @@ class APT_signal(object):
                 data = numpy.concatenate((data, data2))
             librosa.output.write_wav(wavIN[:-4] + "_converted.wav", data, rate)
             (rate, self.signal) = scipy.io.wavfile.read(wavIN[:-4] + "_converted.wav")
+            f = open(join(dirname(__file__), "test.txt"), "w")
+            f.write("Done resample and remixing.")
+            f.close()
             print("Done resample and remixing.\n")
         except:
+            f = open(join(dirname(__file__), "test.txt"), "w")
+            f.write("ERROR! Failed to open input file.")
+            f.close()
             print("ERROR! Failed to open input file.")
             sys.exit("Stopping")
-        
 
     def decode(self, outfile=None, shrp=1.0, cmbn=None, contr=1.0, filter=None):
         #Bandpass filter
@@ -50,11 +59,17 @@ class APT_signal(object):
             lowcut = 2300
             highcut = 2500
             fs = 20800
+            f = open(join(dirname(__file__), "test.txt"), "w")
+            f.write("Applying bandpass filter")
+            f.close()
             print("Applying bandpass filter")
             signalButter = butter_bandpass_filter(self.signal, lowcut, highcut, fs)
             print("Done.\n")
 
         # Take the Hilbert transform
+        f = open(join(dirname(__file__), "test.txt"), "w")
+        f.write("Taking Hilbert transform...")
+        f.close()
         print("Taking Hilbert transform...")
         try:
             splitNum = 10
@@ -65,46 +80,79 @@ class APT_signal(object):
             signalHilbert = numpy.array([])
             i = 1
             for array in split:
+                Siglenght = scipy.fftpack.next_fast_len(int(len(array)))
+                padding = numpy.zeros((int(Siglenght)) - len(array))
+                array = numpy.hstack((array, padding))
                 temp = scipy.signal.hilbert(array)
                 signalHilbert = numpy.concatenate((signalHilbert, temp))
                 print("transformed {}/{}".format(i, splitNum))
                 i += 1
             print("Done.\n")
         except:
+            f = open(join(dirname(__file__), "test.txt"), "w")
+            f.write("ERROR! Probably ran out of ram. Close all other open apps and try again")
+            f.close()
             print("ERROR! Probably ran out of ram. Close all other open apps and try again")
             sys.exit("Stopping")
 
         # Median filter
+        f = open(join(dirname(__file__), "test.txt"), "w")
+        f.write("Taking median filter...")
+        f.close()
         print("Taking median filter...")
         signalMed = scipy.signal.medfilt(numpy.abs(signalHilbert), 5)
         print("Done.\n")
 
         # Calculate how many elements off our reshaped array will be
+        f = open(join(dirname(__file__), "test.txt"), "w")
+        f.write("Calculating necessary truncation...")
+        f.close()
         print("Calculating necessary truncation...")
         elementDiff = len(signalMed) - ((len(signalMed) // 5)*5)
         print("Done.\n")
 
         # Truncate the filtered signal to that number of elements
+        f = open(join(dirname(__file__), "test.txt"), "w")
+        f.write("Truncating signal...")
+        f.close()
         print("Truncating signal...")
         signalMedTrunc = signalMed[:len(signalMed)-elementDiff]
         print("Done.\n")
 
         # Reshape the truncated filtered signal to have five columns
+        f = open(join(dirname(__file__), "test.txt"), "w")
+        f.write("Reshaping signal...")
+        f.close()
         print("Reshaping signal...")
         signalReshaped = signalMedTrunc.reshape((len(signalMed) // 5, 5))
         print("Done.\n")
 
         # Digitize the reshaped signal
+        f = open(join(dirname(__file__), "test.txt"), "w")
+        f.write("Digitizing signal...")
+        f.close()
         print("Digitizing signal...")
         signalDigitized = self._digitize(signalReshaped[:, 2])
         print("Done.\n")
 
         # Sync the scanlines
+        f = open(join(dirname(__file__), "test.txt"), "w")
+        f.write("Synchronizing scanlines...")
+        f.close()
         print("Synchronizing scanlines...")
-        matrix = self._reshape(signalDigitized)
+        try:
+            matrix = self._reshape(signalDigitized)
+        except:
+            f = open(join(dirname(__file__), "test.txt"), "w")
+            f.write("ERROR! dont know what when wrong tbh")
+            f.close()
+            sys.exit("Error")
         print("Done.\n")
 
         # Create image with data
+        f = open(join(dirname(__file__), "test.txt"), "w")
+        f.write("Forming image...")
+        f.close()
         print("Forming image...")
         image = Image.fromarray(matrix)
         if not outfile is None:
@@ -114,6 +162,9 @@ class APT_signal(object):
 
         #Combine channels
         if not cmbn is None:
+            f = open(join(dirname(__file__), "test.txt"), "w")
+            f.write("Combining the channels")
+            f.close()
             print("Combining the channels")
             img = imageio.imread(outfile1)
             height, width = img.shape
@@ -133,6 +184,7 @@ class APT_signal(object):
 
         #Sharpen image
         if not shrp is float(1.0):
+            
             print("Sharpening image...")
             if not cmbn is None:
                 sharpen = Image.open(outfile2)
@@ -202,8 +254,13 @@ class APT_signal(object):
 
 
 def main(infile, outfile):
+    
     infile = join(dirname(__file__), infile)
     apt = APT_signal(infile)
     apt.decode(outfile, 1.0, 1.0, 1.0, 1)
     os.remove(infile)
     os.remove(infile[:-4] + "_converted.wav")
+
+    f = open(join(dirname(__file__), "test.txt"), "w")
+    f.write("DONE!")
+    f.close()
