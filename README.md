@@ -4,10 +4,8 @@ An APT Decoder that allows you to decoder weather satellites on your phone
 ## About
 The decoder is written in python and can be found [here](https://github.com/Chemfinn/apitran-improved/tree/master/apitran-improved). I simply tweaked the code to work with chaquopy so I could build it into an app. The tweaked python file can be found [here](https://github.com/Blobtoe/Android-APT-Decoder/blob/master/app/src/main/python/app.py).
 
-Currently, the app will only run for 5 minutes because it is running on an unlisenced copy of chaquopy, but I am currently in the process of aquiring one.
-
 ## Installing
-You can find the apk file in [/apk/](https://github.com/Blobtoe/Android-APT-Decoder/blob/master/apk/APT%20Decoder.apk). I plan on releasing it to the play store soon.
+You can find the apk file in [/apk/](https://github.com/Blobtoe/Android-APT-Decoder/blob/master/apk/APT%20Decoder.apk). I plan on releasing it to the play store eventually.
 
 # To do:
   - Add parameters for sharpening and stuff
