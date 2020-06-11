@@ -15,7 +15,7 @@ You can find the apk file in [/apk/](https://github.com/Blobtoe/Android-APT-Deco
   - Implement zoom on images
   - Allow user to pick specific folder to save images
   - Add error messages
-  - Add decoding log
+  - ~Add decoding log~
 
 ## Screenshots
 ![](https://github.com/Blobtoe/Android-APT-Decoder/blob/master/Screenshot_1.jpg)
