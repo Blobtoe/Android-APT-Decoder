@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
 import com.codekidlabs.storagechooser.StorageChooser;
+import com.github.chrisbanes.photoview.PhotoView;
 import com.nbsp.materialfilepicker.MaterialFilePicker;
 import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     TextView outfileTextView;
     TextView decodeTextView;
     ProgressBar progressBar;
+    PhotoView photoView;
 
     String infile = "";
     String outfile = "";
@@ -82,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
         outfileTextView = (TextView) findViewById(R.id.outfileTextView);
         decodeTextView = (TextView) findViewById(R.id.decodeTextView);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        photoView = (PhotoView) findViewById(R.id.photoView);
+
 
 
         infileButton.setOnClickListener(new View.OnClickListener() {
@@ -257,8 +261,7 @@ public class MainActivity extends AppCompatActivity {
                 File imgFile = new  File(src+"_original.png");
                 if(imgFile.exists()){
                     Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                    ImageView myImage = (ImageView) findViewById(R.id.imageView);
-                    myImage.setImageBitmap(myBitmap);
+                    photoView.setImageBitmap(myBitmap);
                 };
             }
         });

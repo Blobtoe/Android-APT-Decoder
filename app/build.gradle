@@ -61,4 +61,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'com.nbsp:materialfilepicker:1.9.1'
     implementation 'com.github.codekidX:storage-chooser:2.0.4.4'
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 }
