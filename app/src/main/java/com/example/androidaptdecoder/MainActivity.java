@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     TextView infileTextView;
     TextView outfileTextView;
     TextView decodeTextView;
+    ProgressBar progressBar;
 
     String infile = "";
     String outfile = "";
@@ -71,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         infileTextView = (TextView) findViewById(R.id.infileTextView);
         outfileTextView = (TextView) findViewById(R.id.outfileTextView);
         decodeTextView = (TextView) findViewById(R.id.decodeTextView);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
 
         infileButton.setOnClickListener(new View.OnClickListener() {
@@ -137,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
                 if (infile != "") {
                     if (outfile != "") {
                         decodeTextView.setText("DECODING...");
+                        progressBar.setVisibility(View.VISIBLE);
                         String fileName = new File(infile).getName();
 
                         try {
@@ -184,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 decodeTextView.setText("DONE");
+                progressBar.setVisibility(View.INVISIBLE);
 
                 //show origianl
                 File imgFile = new  File(src+"_original.png");
