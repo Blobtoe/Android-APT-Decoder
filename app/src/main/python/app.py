@@ -82,8 +82,9 @@ class APT_signal(object):
             for array in split:
                 Siglenght = scipy.fftpack.next_fast_len(int(len(array)))
                 padding = numpy.zeros((int(Siglenght)) - len(array))
-                array = numpy.hstack((array, padding))
+                toHilbert = numpy.hstack((array, padding))
                 temp = scipy.signal.hilbert(array)
+                temp = temp[0:len(array)]
                 signalHilbert = numpy.concatenate((signalHilbert, temp))
                 print("transformed {}/{}".format(i, splitNum))
                 i += 1
