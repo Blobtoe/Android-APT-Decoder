@@ -61,6 +61,13 @@ public class MainActivity extends AppCompatActivity {
 
     String infile = "";
     String outfile = "";
+    Float sharpen = 0f;
+    Boolean combine = false;
+    Float contrast = 0f;
+    Boolean filter = false;
+    Boolean a = false;
+    Boolean b = false;
+
 
     String status = "IDLE";
 
