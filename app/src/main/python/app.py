@@ -192,8 +192,7 @@ class APT_signal(object):
             sharpen = Image.open(outfile1)
             sharpen.load()
             enh1 = ImageEnhance.Sharpness(sharpen)
-            if contr is not float(1.0):
-                Enhanced = enh1.enhance(shrp).save(outfile + "_s.png")
+            Enhanced = enh1.enhance(shrp).save(outfile + "_s.png")
             print("Done.\n")
 
         #Contrast adjustment
@@ -208,6 +207,7 @@ class APT_signal(object):
             contrast.load()
             enh2 = ImageEnhance.Contrast(contrast)
             Contrasted = enh2.enhance(contr).save(outfile + add +"_Contrast.png")
+            os.remove(outfile + "_s.png")
             print("Done.\n")
 
         return matrix
