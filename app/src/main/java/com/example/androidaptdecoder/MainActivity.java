@@ -4,15 +4,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileObserver;
+import android.provider.DocumentsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -38,6 +43,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.regex.Pattern;
+
+import lib.folderpicker.FolderPicker;
 
 import static java.lang.Thread.sleep;
 
@@ -65,11 +72,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (VERSION.SDK_INT > VERSION_CODES.M && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1001);
         }
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (VERSION.SDK_INT > VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 1002);
         }
 
@@ -122,27 +129,8 @@ public class MainActivity extends AppCompatActivity {
         outfileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            // Initialize Builder
-                StorageChooser chooser = new StorageChooser.Builder()
-                        .withActivity(MainActivity.this)
-                        .withFragmentManager(getFragmentManager())
-                        .withMemoryBar(true)
-                        .setType(StorageChooser.DIRECTORY_CHOOSER)
-                        .build();
-
-                try {
-                    chooser.show();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                chooser.setOnSelectListener(new StorageChooser.OnSelectListener() {
-                    @Override
-                    public void onSelect(String path) {
-                        outfile = path;
-                        outfileTextView.setText(path);
-                    }
-                });
+                Intent intent = new Intent(MainActivity.this, FolderPicker.class);
+                startActivityForResult(intent, OUTFILE_REQUEST_CODE);
             }
         });
 
@@ -151,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (infile != "") {
                     if (outfile != "") {
-                        decodeTextView.setText("DECODING...");
+                        decodeTextView.setText("Decoding...");
                         progressBar.setVisibility(View.VISIBLE);
                         String fileName = new File(infile).getName();
 
@@ -199,8 +187,9 @@ public class MainActivity extends AppCompatActivity {
                                                 }
                                         }
                                     })).start(); // the while thread will start in BG thread
-                                    outfile = "/storage/emulated/0/" + fileName.substring(0, fileName.length() - 3) + "png";
+                                    //outfile = "/storage/emulated/0/" + fileName.substring(0, fileName.length() - 3) + "png";
                                     status = "DECODING";
+                                    System.out.println(infile);
                                     py.getModule("app").callAttr("main", fileName, outfile);
                                     PostDecode(outfile);
                                 } catch (Exception e) {
@@ -246,6 +235,9 @@ public class MainActivity extends AppCompatActivity {
             String filePath = data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH);
             infile = filePath;
             infileTextView.setText(infile);
+        } if (requestCode == OUTFILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            outfile = data.getExtras().getString("data");
+            outfileTextView.setText(outfile);
         }
     }
 
@@ -258,7 +250,8 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.INVISIBLE);
 
                 //show origianl
-                File imgFile = new  File(src+"_original.png");
+                File file = new File(infile);
+                File imgFile = new  File(src+"/"+file.getName().substring(0, file.getName().length()-4)+ "_original.png");
                 if(imgFile.exists()){
                     Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
                     photoView.setImageBitmap(myBitmap);

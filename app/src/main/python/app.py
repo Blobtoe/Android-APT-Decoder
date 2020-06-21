@@ -40,9 +40,9 @@ class APT_signal(object):
             print("ERROR! Failed to open input file.")
             sys.exit("Stopping")
 
-    def decode(self, outfile=None, shrp=1.0, cmbn=None, contr=1.0, filter=None):
+    def decode(self, outfile=None, shrp=False, cmbn=False, contr=False, filter=False, a=False, b=False):
         #Bandpass filter
-        if not filter is None:
+        if filter == True:
             def butter_bandpass_filter(data, lowcut, highcut, fs, order=6):
 
                 def butter_bandpass(lowcut, highcut, fs, order=6):
@@ -138,7 +138,7 @@ class APT_signal(object):
 
         # Sync the scanlines
         f = open(join(dirname(__file__), "test.txt"), "w")
-        f.write("Synchronizing scanlines...")
+        f.write("Synchronizing scanlines... (this might take a while)")
         f.close()
         print("Synchronizing scanlines...")
         try:
@@ -162,7 +162,7 @@ class APT_signal(object):
         print("Done.\n")
 
         #Combine channels
-        if not cmbn is None:
+        if cmbn == True:
             f = open(join(dirname(__file__), "test.txt"), "w")
             f.write("Combining the channels")
             f.close()
@@ -172,42 +172,42 @@ class APT_signal(object):
             width_cutoff = width // 2
             s1 = img[:, :width_cutoff]
             s2 = img[:, width_cutoff:]
-            imageio.imsave(outfile + "_puoli1.png", s1)
-            imageio.imsave(outfile + "_puoli2.png", s2)
-            imR = Image.open(outfile + "_puoli1.png")
-            imGB = Image.open(outfile + "_puoli2.png")
+            imageio.imsave(outfile + "_a.png", s1)
+            imageio.imsave(outfile + "_b.png", s2)
+            imR = Image.open(outfile + "_a.png")
+            imGB = Image.open(outfile + "_b.png")
             imC = Image.merge('RGB', (imR, imGB, imGB))
             imC.save(outfile + "_combined.png")
             outfile2 = (outfile + "_combined.png")
-            #subprocess.call(["rm", outfile + "_puoli1.png"])
-            #subprocess.call(["rm", outfile + "_puoli2.png"])
+        if a != True:
+            os.remove(outfile + "_a.png")
+        if b != True:
+            os.remove(outfile + "_b.png")
             print("Done.\n")
 
         #Sharpen image
-        if not shrp is float(1.0):
+        if shrp is float(1.0):
             
             print("Sharpening image...")
-            if not cmbn is None:
-                sharpen = Image.open(outfile2)
-            else:
-                sharpen = Image.open(outfile1)
+            sharpen = Image.open(outfile1)
             sharpen.load()
             enh1 = ImageEnhance.Sharpness(sharpen)
-            Enhanced = enh1.enhance(shrp).save(outfile + "_s.png")
+            if contr is not float(1.0):
+                Enhanced = enh1.enhance(shrp).save(outfile + "_s.png")
             print("Done.\n")
 
         #Contrast adjustment
-        if not contr is float(1.0):
+        if contr is float(1.0):
             print("Contrast adjustment")
-            if not shrp is float(1.0):
+            add = ""
+            if shrp is float(1.0):
                 contrast = Image.open(outfile + "_s.png")
-            elif not cmbn is None:
-                contrast = Image.open(outfile2)
+                add = "_s"
             else:
                 contrast = Image.opem(outfile1)
             contrast.load()
             enh2 = ImageEnhance.Contrast(contrast)
-            Contrasted = enh2.enhance(contr).save(outfile + "_Contrast.png")
+            Contrasted = enh2.enhance(contr).save(outfile + add +"_Contrast.png")
             print("Done.\n")
 
         return matrix
@@ -255,10 +255,11 @@ class APT_signal(object):
 
 
 def main(infile, outfile):
-    
+    outfile += "/{}".format(infile.split("/")[-1][:-4])
+    print(outfile)
     infile = join(dirname(__file__), infile)
     apt = APT_signal(infile)
-    apt.decode(outfile, 1.0, 1.0, 1.0, 1)
+    apt.decode(outfile=outfile, shrp=1.0, cmbn=True, contr=1.0, filter=True, a=True, b=True)
     os.remove(infile)
     os.remove(infile[:-4] + "_converted.wav")
 
