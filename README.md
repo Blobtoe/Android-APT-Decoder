@@ -11,7 +11,7 @@ You can find the apk file in [/apk/](https://github.com/Blobtoe/Android-APT-Deco
   - Add parameters for sharpening and stuff
   - Fix resmapling on certain files
   - ~Implement zoom on images~
-  - Allow user to pick specific folder to save images
+  - ~Allow user to pick specific folder to save images~
   - Add error messages
   - ~Add decoding log~
 
