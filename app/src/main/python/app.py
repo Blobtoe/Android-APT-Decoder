@@ -12,6 +12,7 @@ from os.path import dirname, join
 import os
 from scipy.signal import butter, sosfilt, sosfreqz
 import imageio
+import math
 
 class APT_signal(object):
     # The audio should get resampled to 20.8 kHz if not there natively
@@ -72,12 +73,14 @@ class APT_signal(object):
         f.close()
         print("Taking Hilbert transform...")
         try:
-            splitNum = 10
+            splitNum = math.ceil((len(self.signal)/self.SAMPLE_RATE)/60)
+            print("splitting in {} pieces".format(splitNum))
             splitLen = len(self.signal) - (len(self.signal)%splitNum)
             if splitLen < len(self.signal):
                 self.signal = self.signal[:int(-(len(self.signal)-splitLen))].copy()
             split = numpy.split(self.signal, splitNum)
             signalHilbert = numpy.array([])
+
             i = 1
             for array in split:
                 Siglenght = scipy.fftpack.next_fast_len(int(len(array)))
@@ -89,8 +92,9 @@ class APT_signal(object):
                 print("transformed {}/{}".format(i, splitNum))
                 i += 1
             print("Done.\n")
-        except:
+        except Exception as e:
             f = open(join(dirname(__file__), "test.txt"), "w")
+            print(e)
             f.write("ERROR! Probably ran out of ram. Close all other open apps and try again")
             f.close()
             print("ERROR! Probably ran out of ram. Close all other open apps and try again")
